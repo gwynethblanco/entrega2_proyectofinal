@@ -18,6 +18,7 @@ from scipy.stats import jarque_bera
 import dash_table
 
 app = dash.Dash(__name__)
+server = app.server
 
 # Leer los datos
 pm10 = pd.read_csv("https://raw.githubusercontent.com/nicollF/datos_dash/refs/heads/main/pm10Series.csv")
@@ -429,5 +430,5 @@ def update_model_graph(selected_model):
 
 # Ejecutar la aplicación
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server()
     #app.run_server(debug=True, host='0.0.0.0', port=9000)
