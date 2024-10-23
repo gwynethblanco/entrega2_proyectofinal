@@ -15,7 +15,7 @@ from sklearn.linear_model import Lasso, Ridge
 from sklearn.pipeline import Pipeline
 from statsmodels.stats.diagnostic import acorr_ljungbox
 from scipy.stats import jarque_bera
-import dash_table
+from dash import dash_table
 
 app = dash.Dash(__name__)
 server = app.server
