@@ -2,6 +2,7 @@ import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output
 import plotly.express as px
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from statsmodels.tsa.stattools import acf, pacf
@@ -16,6 +17,9 @@ from sklearn.pipeline import Pipeline
 from statsmodels.stats.diagnostic import acorr_ljungbox
 from scipy.stats import jarque_bera
 from dash import dash_table
+from plotly.subplots import make_subplots
+import plotly.subplots as sp
+import statsmodels.api as sm
 
 app = dash.Dash(__name__)
 server = app.server
