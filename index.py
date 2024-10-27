@@ -19,11 +19,10 @@ from dash import dash_table
 
 app = dash.Dash(__name__)
 server = app.server
-
 # Leer los datos
 pm10 = pd.read_csv("https://raw.githubusercontent.com/nicollF/datos_dash/refs/heads/main/pm10Series.csv")
 ermita17_19 = pd.read_csv("https://raw.githubusercontent.com/nicollF/datos_dash/refs/heads/main/Serie1719.csv")
-newseries = pd.read_csv('https://raw.githubusercontent.com/nicollF/datos_dash/refs/heads/main/seriefinalpm10.csv')
+newseries = pd.read_csv('https://raw.githubusercontent.com/nicollF/datos_dash/refs/heads/main/seriefinalpm10.csv') # serie imputada del pm10
 data_pm10 = pd.read_csv('https://raw.githubusercontent.com/nicollF/datos_dash/refs/heads/main/seriepm10.csv')
 
 
@@ -236,6 +235,218 @@ pacf_plot_imputada.update_layout(
     width=700
 )
 
+#GRAFICAS DE LA DISTRIBUCION ANTES Y DESPUES
+distri = make_subplots(rows=1, cols=2, subplot_titles=("Distribución original", "Distribución luego de la imputación"))
+
+# Histograma 1
+distri.add_trace(
+    go.Histogram(
+        x=pm10['pm10'],
+        nbinsx=30,
+        marker_color='#473C8B',
+        opacity=0.7,
+        name='Distribución original'
+    ),
+    row=1, col=1
+)
+
+# Añadir línea KDE 1
+distri.add_trace(
+    go.Scatter(
+        x=pm10['pm10'].sort_values(),
+        y=pm10['pm10'].plot(kind='kde').get_lines()[0].get_ydata(),
+        mode='lines',
+        line=dict(color='#473C8B'),
+        name='KDE original'
+    ),
+    row=1, col=1
+)
+
+# Histograma 2
+distri.add_trace(
+    go.Histogram(
+        x=newseries['pm10'],
+        nbinsx=30,
+        marker_color='#473C8B',
+        opacity=0.7,
+        name='Distribución luego de la imputación'
+    ),
+    row=1, col=2
+)
+
+# Añadir línea KDE 2
+distri.add_trace(
+    go.Scatter(
+        x=newseries['pm10'].sort_values(),
+        y=newseries['pm10'].plot(kind='kde').get_lines()[0].get_ydata(),
+        mode='lines',
+        line=dict(color='#473C8B'),
+        name='KDE imputada'
+    ),
+    row=1, col=2
+)
+
+# Actualizar los títulos y el layout
+distri.update_layout(title_text="Distribuciones de PM10 antes y después de la imputación", showlegend=False)
+distri.update_xaxes(title_text="Concentración de PM10")
+distri.update_yaxes(title_text="Frecuencia")
+
+
+
+
+# GRAFICAS RESIDUOS DE LOS MODELOSSSS - - - - - - - - - - - - - - - - - - - - - 
+
+redknn = sp.make_subplots(rows=1, cols=2, subplot_titles=("Histograma de los Residuos", "Gráfico de Autocorrelación de los Residuos con Significancia"))
+
+# Histograma de los residuos para K-NN
+redknn.add_trace(
+    go.Histogram(
+        x=residuos_knn,
+        nbinsx=30,
+        marker=dict(color='#473C8B', line=dict(color='black', width=1)),
+        opacity=0.75
+    ),
+    row=1, col=1
+)
+
+# Calcular y graficar la autocorrelación para K-NN
+acf_values_knn = sm.tsa.acf(residuos_knn, nlags=20)
+lags_knn = list(range(len(acf_values_knn)))
+
+redknn.add_trace(
+    go.Scatter(
+        x=lags_knn,
+        y=acf_values_knn,
+        mode='lines+markers',
+        marker=dict(color='#473C8B'),
+        name='Autocorrelación'
+    ),
+    row=1, col=2
+)
+
+# Agregar líneas de significancia para K-NN
+for i in range(len(acf_values_knn)):
+    redknn.add_shape(
+        type='line',
+        x0=lags_knn[i],
+        y0=0.05,
+        x1=lags_knn[i],
+        y1=acf_values_knn[i],
+        line=dict(color='red', dash='dash'),
+        row=1, col=2
+    )
+
+redknn.update_layout(
+    title_text='Análisis de Residuos para K-NN',
+    xaxis_title="Valor del Residuo",
+    yaxis_title="Frecuencia",
+    xaxis2_title="Lags",
+    yaxis2_title="Autocorrelación",
+    height=500,
+    width=1480
+)
+
+# GRAFICAS RESIDUOS PARA LASSO - - - - - - - - - - - - - - - - - - - - - 
+redlasso = sp.make_subplots(rows=1, cols=2, subplot_titles=("Histograma de los Residuos", "Gráfico de Autocorrelación de los Residuos con Significancia"))
+
+# Histograma de los residuos para Lasso
+redlasso.add_trace(
+    go.Histogram(
+        x=residuos_lasso,
+        nbinsx=30,
+        marker=dict(color='#473C8B', line=dict(color='black', width=1)),
+        opacity=0.75
+    ),
+    row=1, col=1
+)
+
+# Calcular y graficar la autocorrelación para Lasso
+acf_values_lasso = sm.tsa.acf(residuos_lasso, nlags=20)
+lags_lasso = list(range(len(acf_values_lasso)))
+
+redlasso.add_trace(
+    go.Scatter(
+        x=lags_lasso,
+        y=acf_values_lasso,
+        mode='lines+markers',
+        marker=dict(color='#473C8B'),
+        name='Autocorrelación'
+    ),
+    row=1, col=2
+)
+
+# Agregar líneas de significancia para Lasso
+for i in range(len(acf_values_lasso)):
+    redlasso.add_shape(
+        type='line',
+        x0=lags_lasso[i],
+        y0=0.05,
+        x1=lags_lasso[i],
+        y1=acf_values_lasso[i],
+        line=dict(color='red', dash='dash'),
+        row=1, col=2
+    )
+
+redlasso.update_layout(
+    title_text='Análisis de Residuos para Lasso',
+    xaxis_title="Valor del Residuo",
+    yaxis_title="Frecuencia",
+    xaxis2_title="Lags",
+    yaxis2_title="Autocorrelación",
+    height=500,
+    width=1480
+)
+
+# GRAFICAS RESIDUOS PARA RIDGE - - - - - - - - - - - - - - - - - - - - - 
+redridge = sp.make_subplots(rows=1, cols=2, subplot_titles=("Histograma de los Residuos", "Gráfico de Autocorrelación de los Residuos con Significancia"))
+
+# Histograma de los residuos para Ridge
+redridge.add_trace(
+    go.Histogram(
+        x=residuos_ridge,
+        nbinsx=30,
+        marker=dict(color='#473C8B', line=dict(color='black', width=1)),
+        opacity=0.75
+    ),
+    row=1, col=1
+)
+
+# Calcular y graficar la autocorrelación para Ridge
+acf_values_ridge = sm.tsa.acf(residuos_ridge, nlags=20)
+lags_ridge = list(range(len(acf_values_ridge)))
+
+redridge.add_trace(
+    go.Scatter(
+        x=lags_ridge,
+        y=acf_values_ridge,
+        mode='lines+markers',
+        marker=dict(color='#473C8B'),
+        name='Autocorrelación'
+    ),
+    row=1, col=2
+)
+
+# Agregar líneas de significancia para Ridge
+for i in range(len(acf_values_ridge)):
+    redridge.add_shape(
+        type='line',
+        x0=lags_ridge[i],
+        y0=0.05,
+        x1=lags_ridge[i],
+        y1=acf_values_ridge[i],
+        line=dict(color='red', dash='dash'),
+        row=1, col=2
+    )
+
+redridge.update_layout(
+    title_text='Análisis de Residuos para Ridge',
+    xaxis_title="Valor del Residuo",
+    yaxis_title="Frecuencia",
+    xaxis2_title="Lags",
+    yaxis2_title="Autocorrelación",
+    height=500,
+    width=1480
+)
 
 
 #cards
@@ -253,21 +464,40 @@ cards = [
 
 
 
+
 # Datos de la tabla
-tabla_data = pd.DataFrame({
-    'Modelo': ['K-NN', 'Lasso', 'Ridge'],
-    'MAE': [9.717867, 10.068336, 10.067056],
-    'MSE': [186.206472, 203.764545, 203.763002],
-    'RMSE': [13.645749, 14.274612, 14.274558],
-    'r2': [0.598803, 0.560972, 0.560976],
-    'Ljung-Box': [4.894530e-34, 3.478560e-01, 3.891170e-01],
-    'Jarque-Bera': [0.0, 0.0, 0.0]
+tabla_knn = pd.DataFrame({
+    'Modelo': ['K-NN'],
+    'MAE': [9.717867],
+    'MSE': [186.206472],
+    'RMSE': [13.645749],
+    'r2': [0.598803],
+    'Ljung-Box': [4.894530e-34],
+    'Jarque-Bera': [0.0]
+})
+tabla_lasso = pd.DataFrame({
+    'Modelo': ['Lasso'],
+    'MAE': [10.068336],
+    'MSE': [203.764545],
+    'RMSE': [14.274612],
+    'r2': [0.560972],
+    'Ljung-Box': [3.478560e-01],
+    'Jarque-Bera': [0.0]
+})
+tabla_ridge = pd.DataFrame({
+    'Modelo': ['Ridge'],
+    'MAE': [10.067056],
+    'MSE': [203.763002],
+    'RMSE': [14.274558],
+    'r2': [0.560976],
+    'Ljung-Box': [3.891170e-01],
+    'Jarque-Bera': [0.0]
 })
 
-# Diseño de la tabla
-tabla_modelos = dash_table.DataTable(
-    data=tabla_data.to_dict('records'),
-    columns=[{'name': col, 'id': col} for col in tabla_data.columns],
+# Diseño de la tabla --------------------------------------------------------------------
+tabla_modknn = dash_table.DataTable(
+    data=tabla_knn.to_dict('records'),
+    columns=[{'name': col, 'id': col} for col in tabla_knn.columns],
     style_cell={'textAlign': 'center', 'padding': '5px'},
     style_header={
         'backgroundColor': '#473C8B',
@@ -280,7 +510,36 @@ tabla_modelos = dash_table.DataTable(
     },
     style_table={'margin-top': '20px', 'width': '90%'} 
 )
-
+tabla_modlasso = dash_table.DataTable(
+    data=tabla_lasso.to_dict('records'),
+    columns=[{'name': col, 'id': col} for col in tabla_lasso.columns],
+    style_cell={'textAlign': 'center', 'padding': '5px'},
+    style_header={
+        'backgroundColor': '#473C8B',
+        'fontWeight': 'bold',
+        'color': 'white'
+    },
+    style_data={
+        'backgroundColor': '#f0f0f0',
+        'color': '#000000'
+    },
+    style_table={'margin-top': '20px', 'width': '90%'} 
+)
+tabla_modridge = dash_table.DataTable(
+    data=tabla_ridge.to_dict('records'),
+    columns=[{'name': col, 'id': col} for col in tabla_ridge.columns],
+    style_cell={'textAlign': 'center', 'padding': '5px'},
+    style_header={
+        'backgroundColor': '#473C8B',
+        'fontWeight': 'bold',
+        'color': 'white'
+    },
+    style_data={
+        'backgroundColor': '#f0f0f0',
+        'color': '#000000'
+    },
+    style_table={'margin-top': '20px', 'width': '90%'} 
+)
 
 
 # Diseño de la aplicación con pestañas
@@ -301,6 +560,7 @@ app.layout = html.Div(style ={'backgroundColor': '#f0f0f0'}, children=[
                         options=[
                             {'label': 'Serie Original', 'value': 'original'},
                             {'label': 'Serie Imputada', 'value': 'imputada'},
+                            {'label': 'Distribuciones', 'value': 'dist'},
                         ],  
                         value='original',  # Valor por defecto
                         placeholder='Selecciona una opción',
@@ -369,7 +629,7 @@ app.layout = html.Div(style ={'backgroundColor': '#f0f0f0'}, children=[
                         style={'width' : "40%"}
 
                     ),
-                    tabla_modelos, 
+             
                          
                         html.Div(id='model-graphs-container', style={'margin-top': '20px'})
                         
@@ -408,7 +668,8 @@ def update_graph(selected_option):
             dcc.Graph(figure=acf_plot_imputada),
             dcc.Graph(figure=pacf_plot_imputada)
         ]))
-
+    elif selected_option == 'dist':
+        graphs.append(dcc.Graph(figure=distri))  # distribucion antes y despues
     return graphs
 
 # Callback para actualizar la gráfica según la selección del dropdown de los modelos
@@ -418,11 +679,24 @@ def update_graph(selected_option):
 )
 def update_model_graph(selected_model):
     if selected_model == 'k-nn':
-        return dcc.Graph(figure=knnfig)  # Gráfica del modelo KNN
+        return html.Div([
+            html.Table(tabla_modknn),
+            dcc.Graph(figure=knnfig),
+            dcc.Graph(figure=redknn)
+            
+        ])  
     elif selected_model == 'lasso':
-        return dcc.Graph(figure=lassofig)  # Gráfica del modelo Lasso
+        return html.Div([
+            html.Table(tabla_modlasso),            
+            dcc.Graph(figure=lassofig), # Gráfica del modelo Lasso
+            dcc.Graph(figure=redlasso)
+        ])
     elif selected_model == 'ridge':
-        return dcc.Graph(figure=ridgefig)  # Gráfica del modelo Ridge
+        return html.Div([
+            html.Table(tabla_modridge),             
+            dcc.Graph(figure=ridgefig), # Gráfica del modelo Ridge 
+            dcc.Graph(figure=redridge)
+        ])
     else:
         return html.P("Selecciona un modelo para visualizar su predicción.")
 
