@@ -9,4 +9,3 @@ scipy
 gunicorn
 matplotlib
 xgboost
-os
