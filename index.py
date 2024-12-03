@@ -129,17 +129,21 @@ def crear_distribucion(data, title):
     return distri
 # ---------------------------------MODELOS-----------------------------------
 
-with open('C:/Users/Usuario/Pictures/CARPETAPROYECTOFINAL/entrega2_proyectofinal/resultados_XGB.pkl', 'rb') as file:
+# Cargar el diccionario desde el archivo pickle
+with open('resultados_XGB.pkl', 'rb') as file:
     resultados_xgboost = pickle.load(file)
 
-with open('C:/Users/Usuario/Pictures/CARPETAPROYECTOFINAL/entrega2_proyectofinal/resultados_svr_final.pkl', 'rb') as file:
+with open('resultados_SVR_final.pkl', 'rb') as file:
     resultados_svr = pickle.load(file)
 
-with open('C:/Users/Usuario/Pictures/CARPETAPROYECTOFINAL/entrega2_proyectofinal/resultados_rf_final.pkl', 'rb') as file:
-    resultados_rf = pickle.load(file)
 
-with open('C:/Users/Usuario/Pictures/CARPETAPROYECTOFINAL/entrega2_proyectofinal/resultados_hibrido_xgb_svr.pkl', 'rb') as file:
+with open('resultados_rf_final.pkl', 'rb') as file:
+    resultados_rf = pickle.load(file)
+    
+with open('resultados_hibrido_xgb_svr.pkl', 'rb') as file:
     hybridmodel = pickle.load(file)
+        
+    
 # Función para crear los gráficos con Plotly
 
 def graficasmodelos(observed, predicted, training_data, title):
