@@ -15,6 +15,7 @@ import statsmodels.api as sm
 from statsmodels.tsa.stattools import acf, pacf
 import plotly.graph_objects as go
 import plotly.express as px
+import os
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
 server = app.server
@@ -819,4 +820,4 @@ def update_graph_for_model_and_window(selected_model, selected_window):
     
 # Ejecutar la app
 if __name__ == '__main__':
-    app.run_server()
+    app.run_server(host="0.0.0.0", port=int(os.getenv("PORT", 8050)))
