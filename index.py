@@ -133,7 +133,7 @@ def crear_distribucion(data, title):
 with open('resultados_XGB.pkl', 'rb') as file:
     resultados_xgboost = pickle.load(file)
 
-with open('resultados_SVR_final.pkl', 'rb') as file:
+with open('resultados_svr_final.pkl', 'rb') as file:
     resultados_svr = pickle.load(file)
 
 
