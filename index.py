@@ -820,4 +820,3 @@ def update_graph_for_model_and_window(selected_model, selected_window):
 # Ejecutar la app
 if __name__ == '__main__':
     app.run_server()
-    #app.run_server(debug=True, host='0.0.0.0', port=9000)
