@@ -468,7 +468,7 @@ def tablametricas(resultados, ventana=None, modelo=None):
 
 # ------------------------------------------Crear la aplicación Dash -----------------------------------------------
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUX], suppress_callback_exceptions=True)
+#app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUX], suppress_callback_exceptions=True)
 
 # Estilos para la barra lateral
 SIDEBAR_STYLE = {
